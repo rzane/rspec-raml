@@ -1,0 +1,21 @@
+#%RAML 0.8
+---
+title: Dummy API
+baseUri: https://dummy-api.com/api/{version}
+version: v1
+
+/users:
+  /{id}:
+    displayName: Find a user
+    get:
+      responses:
+        200:
+          description: User was found.
+          body:
+            application/json:
+              example: |-
+                {
+                  "id": 1,
+                  "first_name": "John",
+                  "last_name": "Doe"
+                }
