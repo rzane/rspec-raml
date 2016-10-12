@@ -1,8 +1,6 @@
 # Rspec::Raml
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rspec/raml`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+RSpec matchers for working with [RAML](http://raml.org).
 
 ## Installation
 
@@ -20,22 +18,78 @@ Or install it yourself as:
 
     $ gem install rspec-raml
 
+## Setup
+
+First, you'll need to include RSpec::Raml's helpers in your RSpec configuration.
+
+```ruby
+RSpec.configure do |config|
+  config.include RSpec::Raml::Matchers, type: :request
+end
+```
+
 ## Usage
 
-TODO: Write usage instructions here
+Assume you've got a RAML specification:
 
-## Development
+```yaml
+#%RAML 0.8
+---
+title: Dummy API
+baseUri: https://dummy-api.com/api/{version}
+version: v1
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+/users:
+  /{id}:
+    displayName: Find a user
+    get:
+      responses:
+        200:
+          description: User was found.
+          body:
+            application/json:
+              example: |-
+                {
+                  "id": 1,
+                  "first_name": "John",
+                  "last_name": "Doe"
+                }
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```
+
+You can write a spec that compares an HTTP response with the RAML specifcation you've written.
+
+```ruby
+# spec/requests/api/v1/users_spec.rb
+
+describe 'Users API' do
+  describe 'GET /api/v1/users/:id' do
+    raml { Rails.root.join('docs/api/v1.raml') }
+
+    let(:user) {
+      User.create!(
+        id: 1,
+        first_name: 'John',
+        last_name: 'Doe'
+      )
+    }
+
+    it 'is documented' do
+      get "/api/v1/users/#{user.id}"
+      expect(response).to match_raml(:get, '/users/{id}', 200)
+    end
+  end
+end
+```
+
+The `match_raml` matcher will verify that the status code returns successfully, and that the response body matches what you've declared in your RAML specification.
+
+If you haven't written your specification yet, RSpec::Raml will output an example RAML specification.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rspec-raml.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/rzane/rspec-raml.
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
