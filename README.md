@@ -1,5 +1,7 @@
 # Rspec::Raml
 
+[![Build Status](https://travis-ci.org/rzane/rspec-raml.svg?branch=master)](https://travis-ci.org/rzane/rspec-raml)
+
 RSpec matchers for working with [RAML](http://raml.org).
 
 ## Installation
