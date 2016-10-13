@@ -15,8 +15,10 @@ module RSpec
         node.children.flat_map do |child|
           if child.kind_of?(::Raml::Resource) && child.resource_path == path
             child
-          else
+          elsif child.respond_to?(:children)
             find_resources(path, child)
+          else
+            []
           end
         end
       end

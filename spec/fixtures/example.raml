@@ -4,9 +4,22 @@ title: Dummy API
 baseUri: https://dummy-api.com/api/{version}
 version: v1
 
+traits:
+  - notAlwaysFound:
+      responses:
+        404:
+          description: User not found.
+          body:
+            application/json:
+              example: |-
+                {
+                  "error": "Not found."
+                }
+
 /users:
   /{id}:
     displayName: Find a user
+    is: [notAlwaysFound]
     get:
       responses:
         200:
