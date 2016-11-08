@@ -5,7 +5,11 @@ module RSpec
     module Matchers
       class MatchRamlBody < Abstract
         def failure_message
-          diff = differ.diff_as_string(response_body, raml_body)
+          diff = differ.diff_as_object(
+            response_body,
+            raml_body
+          )
+
           "expected response bodies to match:#{diff}"
         end
 
@@ -20,19 +24,15 @@ module RSpec
         end
 
         def response_body
-          @response_body ||= indent_pretty_format(response.body)
+          @response_body ||= JSON.parse(response.body)
         end
 
         def raml_body
-          @raml_body ||= indent_pretty_format(raml.bodies.fetch(content_type).example)
+          @raml_body ||= JSON.parse(raml.bodies.fetch(content_type).example)
         end
 
         def differ
           @differ ||= RSpec::Support::Differ.new(color: true)
-        end
-
-        def indent_pretty_format(body)
-          pretty_format(body).gsub("\n", "\n  ").prepend('  ')
         end
       end
     end

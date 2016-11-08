@@ -24,10 +24,6 @@ module RSpec
         def content_type
           response.content_type.to_s
         end
-
-        def pretty_format(body)
-          JSON.pretty_generate(JSON.parse(body))
-        end
       end
     end
   end
