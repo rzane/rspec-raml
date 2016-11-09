@@ -6,6 +6,10 @@ module RSpec
       class MatchRaml < Abstract
         delegate :failure_message, :failure_message_when_negated, to: :failure
 
+        def description
+          'match RAML'
+        end
+
         private
 
         def matches_raml?

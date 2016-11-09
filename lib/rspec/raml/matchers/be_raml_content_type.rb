@@ -4,6 +4,10 @@ module RSpec
   module Raml
     module Matchers
       class BeRamlContentType < Abstract
+        def description
+          'be RAML content type'
+        end
+
         def failure_message
           "expected RAML to declare a response for content type: #{content_type}"
         end

@@ -4,6 +4,10 @@ module RSpec
   module Raml
     module Matchers
       class MatchRamlStatus < Abstract
+        def description
+          'match RAML status'
+        end
+
         def failure_message
           "expected the response to have a #{raml.name} status code, but got #{response.status}"
         end
