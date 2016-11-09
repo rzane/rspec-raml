@@ -21,9 +21,24 @@ module RSpec
         end
 
         def matchers
-          (RSpec::Raml::Matchers::MATCHERS - [self.class]).map do |matcher|
+          @matchers ||= (RSpec::Raml::Matchers::MATCHERS - [self.class]).map do |matcher|
             matcher.new(raml, verb, url, status)
           end
+        end
+
+        def respond_to_missing?(meth, *)
+          matchers.any? { |m| m.respond_to?(meth) } || super
+        end
+
+        def method_missing(meth, *args, &block)
+          valid = matchers.any? do |matcher|
+            if matcher.respond_to?(meth)
+              matcher.send(meth, *args, &block)
+              true
+            end
+          end
+
+          valid ? self : super
         end
       end
     end
