@@ -23,7 +23,7 @@ RSpec.describe RSpec::Raml::Matchers::MatchRamlBody do
     }
 
     specify {
-      is_expected.to match_raml_body(:get, '/users/{id}', 200).except(:id)
+      is_expected.to match_raml_body(:get, '/users/{id}', 200).exclude(:id)
     }
   end
 
@@ -31,5 +31,34 @@ RSpec.describe RSpec::Raml::Matchers::MatchRamlBody do
     let(:matcher) { match_raml_body(:get, '/users/{id}', 200) }
     include_examples 'when raml is not found'
     include_examples 'when the body does not match'
+  end
+
+  context 'with nested excludes' do
+    subject { build_response(body: body.to_json) }
+
+    let(:body) {
+      {
+        id: 5,
+        title: 'Fun',
+        author: {
+          name: 'Jeff',
+          age: 12
+        },
+        awards: [
+          {
+            id: 18,
+            name: 'Emmy'
+          }
+        ]
+      }
+    }
+
+    specify {
+      is_expected.to match_raml_body(:get, '/posts/{id}', 200).exclude(
+        :id,
+        author: :name,
+        awards: [:id]
+      )
+    }
   end
 end

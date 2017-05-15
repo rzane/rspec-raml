@@ -32,3 +32,29 @@ traits:
                   "first_name": "John",
                   "last_name": "Doe"
                 }
+
+/posts:
+  /{id}:
+    displayName: Find a post
+    is: [notAlwaysFound]
+    get:
+      responses:
+        200:
+          description: Post was found.
+          body:
+            application/json:
+              example: |-
+                {
+                  "id": 1,
+                  "title": "Fun",
+                  "author": {
+                    "name": "Rick",
+                    "age": 12
+                  },
+                  "awards": [
+                    {
+                      "id": 1,
+                      "name": "Emmy"
+                    }
+                  ]
+                }

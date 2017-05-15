@@ -1,3 +1,4 @@
+require 'rspec/raml/exclusion_filter'
 require 'rspec/raml/matchers/abstract'
 
 module RSpec
@@ -6,24 +7,22 @@ module RSpec
       class MatchRamlBody < Abstract
         def initialize(*)
           super
-          @except = []
+          @excludes = []
+          @differ   = RSpec::Support::Differ.new(color: true)
         end
 
         def description
           'match RAML body'
         end
 
-        def except(*keys)
-          @except |= keys.map(&:to_s)
+        def exclude(*values)
+          @excludes += values
           self
         end
+        alias except exclude
 
         def failure_message
-          diff = differ.diff_as_object(
-            response_body,
-            raml_body
-          )
-
+          diff = @differ.diff_as_object(actual, expected)
           "expected response bodies to match:#{diff}"
         end
 
@@ -34,34 +33,22 @@ module RSpec
         private
 
         def matches_raml?
-          response_body == raml_body
+          RSpec::Support::FuzzyMatcher.values_match?(expected, actual)
         end
 
-        def response_body
-          @response_body ||= comparable(response.body)
+        def actual
+          @actual ||= JSON.parse(response.body)
         end
 
-        def raml_body
-          @raml_body ||= comparable(raml.bodies.fetch(content_type).example)
-        end
-
-        def differ
-          @differ ||= RSpec::Support::Differ.new(color: true)
-        end
-
-        def comparable(body)
-          remove_exceptions JSON.parse(body)
-        end
-
-        def remove_exceptions(data)
-          case data
-          when Array
-            data.map { |item| remove_exceptions(item) }
-          when Hash
-            data.slice(*(data.keys - @except))
-          else
-            data
+        def expected
+          @expected ||= begin
+            example = raml.bodies.fetch(content_type).example
+            exclusion_filter.filter JSON.parse(example)
           end
+        end
+
+        def exclusion_filter
+          ExclusionFilter.new(@excludes)
         end
       end
     end
