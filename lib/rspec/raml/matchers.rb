@@ -1,4 +1,5 @@
-require 'raml'
+require 'raml-rb'
+require 'active_support/core_ext/string'
 require 'rspec/raml/finder'
 require 'rspec/raml/matchers/null_matcher'
 require 'rspec/raml/matchers/match_raml'
@@ -31,7 +32,7 @@ module RSpec
         def raml(&block)
           let(:_raml_file, &block)
           let(:_raml_finder) do
-            RSpec::Raml::Finder.new(::Raml.parse_file(_raml_file))
+            RSpec::Raml::Finder.new(::Raml::Parser.parse_file(_raml_file))
           end
         end
       end

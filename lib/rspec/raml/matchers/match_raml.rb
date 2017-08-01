@@ -1,4 +1,5 @@
 require 'rspec/raml/matchers/abstract'
+require 'active_support/core_ext/module/delegation'
 
 module RSpec
   module Raml

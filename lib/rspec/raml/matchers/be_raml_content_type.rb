@@ -19,7 +19,7 @@ module RSpec
         private
 
         def matches_raml?
-          raml.bodies.key? content_type
+          !!raml.bodies.find { |b| b.content_type == content_type }
         end
       end
     end

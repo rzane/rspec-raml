@@ -9,31 +9,29 @@ module RSpec
         @raml = raml
       end
 
-      # Recursively traverses the raml structure and locates all Raml::Resources
+      # Recursively traverses the raml structure and locates all resources
       # with a matching url.
-      def find_resources(path, node = raml)
-        node.children.flat_map do |child|
-          if child.kind_of?(::Raml::Resource) && child.resource_path == path
-            child
-          elsif child.respond_to?(:children)
-            find_resources(path, child)
+      def find_resources(path, node: raml)
+        node.resources.flat_map do |resource|
+          children = find_resources(path, node: resource)
+
+          if resource.path == path
+            children + [resource]
           else
-            []
+            children
           end
         end
       end
 
       # Finds the response that matches the verb, path, and status.
       def find_response(verb, path, status)
-        resources = find_resources(path)
-
-        resource = resources.find do |node|
-          method = node.methods[verb.to_s]
-          method && method.responses[status]
-        end
-
-        http_method = resource && resource.methods[verb.to_s]
-        http_method.responses[status] if http_method
+        find_resources(path)
+          .lazy
+          .flat_map(&:http_methods)
+          .select { |m| m.method == verb.to_s }
+          .flat_map(&:responses)
+          .select { |r| r.code == status }
+          .first
       end
     end
   end
