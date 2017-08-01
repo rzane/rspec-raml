@@ -31,7 +31,12 @@ module RSpec
         def raml(&block)
           let(:_raml_file, &block)
           let(:_raml_finder) do
-            RSpec::Raml::Finder.new(::Raml.parse_file(_raml_file))
+            file = File.read(_raml_file)
+            dir  = File.dirname(_raml_file)
+            dir  = nil if dir == ''
+
+            parser = ::Raml::Parser.parse(file, dir)
+            RSpec::Raml::Finder.new(parser)
           end
         end
       end
