@@ -42,11 +42,8 @@ module RSpec
 
         def expected
           @expected ||= begin
-            body = raml.bodies.find do |b|
-              b.content_type == content_type
-            end
-
-            exclusion_filter.filter JSON.parse(body.example)
+            example = raml.bodies.fetch(content_type).example
+            exclusion_filter.filter JSON.parse(example)
           end
         end
 
